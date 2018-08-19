@@ -1,28 +1,29 @@
 package com.mi.heap.dao;
 
 public class PojoField {
-   private String className;
-   private String fieldName;
-   private String comment;
-   private String columnFieldName;
+    private String className;
+    private String fieldName;
+    private String comment;
+    private String columnFieldName;
 
+    private PojoField(String columnType, String fieldName, String comment) {
 
+        this.className = ColumnTypeEnum.getByColumnType(columnType).getJavaType();
+        if (comment.contains("bool")) {
+            this.className = ColumnTypeEnum.BOOL.getJavaType();
+        }
+        if (!fieldName.contains("_")) {
+            this.fieldName = fieldName;
+        } else {
+            this.fieldName = CamelUtils.toCamelString(fieldName);
+        }
 
-   private PojoField(String columnType, String fieldName){
+    }
 
-       this.className = ColumnTypeEnum.getByColumnType(columnType).getJavaType();
-       if (!fieldName.contains("_")){
-           this.fieldName = fieldName;
-       }else {
-           this.fieldName = CamelUtils.toCamelString(fieldName);
-       }
-
-   }
-
-    public PojoField(ColumnBean columnBean){
-       this(columnBean.getColumnType(),columnBean.getColumnName());
-       this.comment = columnBean.getColumnComment();
-       this.columnFieldName = columnBean.getColumnName();
+    public PojoField(ColumnBean columnBean) {
+        this(columnBean.getColumnType(), columnBean.getColumnName(), columnBean.getColumnComment());
+        this.comment = columnBean.getColumnComment();
+        this.columnFieldName = columnBean.getColumnName();
     }
 
     public String getClassName() {

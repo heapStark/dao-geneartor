@@ -1,5 +1,8 @@
-package com.mi.heap.dao;
+package com.mi.heap.util;
 
+import com.mi.heap.dao.ColumnBean;
+import com.mi.heap.dao.PojoField;
+import com.mi.heap.dao.SessionFactory;
 import com.mi.heap.mapper.TableMapper;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;

@@ -1,6 +1,5 @@
 package com.mi.heap.util;
 
-
 import com.mi.heap.dao.CamelUtils;
 import com.mi.heap.dao.PojoField;
 
@@ -12,30 +11,37 @@ import java.util.List;
 /**
  * Created by WZL on 2018/3/25.
  */
-public class POJOUtil {
+public class POJO {
+    String path;
+    String pojoName;
+    List<PojoField> pojoFieldList;
+    BufferedWriter bufferedWriter;
 
-    public static void startCreatePOJO(String path, String pojoName, List<PojoField> pojoFieldList) throws Exception {
+    public POJO(String path, String pojoName, List<PojoField> pojoFieldList) throws Exception {
+        this.path = path;
+        this.pojoName = pojoName;
+        this.pojoFieldList = pojoFieldList;
+        this.bufferedWriter = createBufferedWriter(path,pojoName);
+    }
 
+    public void startCreatePOJO() throws Exception {
 
-        BufferedWriter bufferedWriter = createBufferedWriter(path, pojoName);
         String packageName = path.split("java")[1].substring(1).replaceAll("/", ".");
         FileUtils.writeLine(bufferedWriter, "package " + packageName + ".pojo" + ";");
         bufferedWriter.newLine();
 
-        writeImports(bufferedWriter, pojoFieldList);
+        writeImports();
 
         FileUtils.writeLine(bufferedWriter, "public class " + pojoName + " {");
 
-        writeFields(bufferedWriter, pojoFieldList);
+        writeFields();
 
-        if (Configure.SETTERGETTER){
-            writeGetterANDSetter(bufferedWriter, pojoFieldList);
+        if (Configure.SETTERGETTER) {
+            writeGetterANDSetter();
         }
-        if (Configure.TOSTRING){
-            writeToString(bufferedWriter,pojoFieldList,pojoName);
+        if (Configure.TOSTRING) {
+            writeToString();
         }
-
-
 
         bufferedWriter.write("}");
         bufferedWriter.flush();
@@ -43,7 +49,7 @@ public class POJOUtil {
 
     }
 
-    private static BufferedWriter createBufferedWriter(String path, String pojoName) throws Exception {
+    private BufferedWriter createBufferedWriter(String path,String pojoName) throws Exception {
         File dir = new File(path + "/pojo");
         if (!dir.exists()) {
             dir.mkdirs();
@@ -59,8 +65,7 @@ public class POJOUtil {
         return bufferedWriter;
     }
 
-
-    private static void writeImports(BufferedWriter bufferedWriter, List<PojoField> pojoFieldList) throws Exception {
+    private void writeImports() throws Exception {
 
         for (PojoField pojoField : pojoFieldList) {
             if (pojoField.getClassName().equals("Date")) {
@@ -73,7 +78,7 @@ public class POJOUtil {
 
     }
 
-    private static void writeFields(BufferedWriter bufferedWriter, List<PojoField> pojoFieldList) throws Exception {
+    private void writeFields() throws Exception {
 
         for (PojoField pojoField : pojoFieldList) {
             if (Configure.COMMENT) {
@@ -87,7 +92,7 @@ public class POJOUtil {
 
     }
 
-    private static void writeGetterANDSetter(BufferedWriter bufferedWriter, List<PojoField> pojoFieldList) throws Exception {
+    private void writeGetterANDSetter() throws Exception {
 
         for (PojoField pojoField : pojoFieldList) {
             FileUtils.writeLine(bufferedWriter, "    public " + pojoField.getClassName() + " get" + CamelUtils.toFirstUperString(pojoField.getFieldName()) + "() {");
@@ -102,21 +107,19 @@ public class POJOUtil {
         }
     }
 
-    private static void writeToString(BufferedWriter bufferedWriter, List<PojoField> pojoFieldList, String pojoName) throws Exception {
+    private void writeToString() throws Exception {
         final StringBuilder sb = new StringBuilder();
         sb.append("    @Override\n    public String toString() {\n");
         sb.append("        final ");
         sb.append(Configure.BUILDER.getSimpleName()).append(" sb = new ").append(Configure.BUILDER.getSimpleName()).append("(\"").append(pojoName).append("{\");\n");
-
 
         String firstName = pojoFieldList.get(0).getFieldName();
         sb.append("        sb.append(\"");
         sb.append(firstName);
         sb.append("=\").append(");
         sb.append(firstName).append(");\n");
-        //sb.append(").append('\\'');\n");
 
-        for (int i=1;i<pojoFieldList.size();i++) {
+        for (int i = 1; i < pojoFieldList.size(); i++) {
 
             String name = pojoFieldList.get(i).getFieldName();
             sb.append("        sb.append(\"");
@@ -126,10 +129,9 @@ public class POJOUtil {
             sb.append(").append('\\'');\n");
         }
 
-
         sb.append("        sb.append('}');\n").append("        return sb.toString();\n").append("    }\n");
 
-        FileUtils.writeLine(bufferedWriter,sb.toString());
+        FileUtils.writeLine(bufferedWriter, sb.toString());
     }
 
 }
